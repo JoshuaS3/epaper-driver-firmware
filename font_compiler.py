@@ -48,8 +48,11 @@ class Glyph:
     height: int = 0
     startx: int = 0
     starty: int = 0
+    duplicate: int = -1
     graphical: list[str] = field(default_factory=list)
     int8arr: list[int] = field(default_factory=list)
+    def __eq__(self, obj):
+        return self.graphical == obj.graphical
 
 
 class FontYAFF:
@@ -92,26 +95,36 @@ const uint8_t FONT_{NAME}[] = {{
                 elif line.startswith(" " * 4):
                     new_glyph.graphical.append(line[4:])
 
-            # Convert graphical representation to byte array
-            new_glyph.height = len(new_glyph.graphical)
-            new_glyph.width = len(new_glyph.graphical[0])
-            # Trim end
-            linear = "".join(new_glyph.graphical).rstrip(".")
-            # Find start position
-            for bit in range(0, len(linear)):
-                if linear[bit] == "@":
-                    new_glyph.startx = bit % new_glyph.width
-                    new_glyph.starty = bit // new_glyph.width
+            # Check if duplicate
+            duplicate = False
+            for existing_glyph in self.glyphs.values():
+                if new_glyph == existing_glyph:
+                    duplicate = True
+                    new_glyph.duplicate = existing_glyph.byte
                     break
-            # Trim start
-            linear = linear.lstrip(".")
-            for byte in range(0, len(linear), 8):
-                n = 0
-                for bit in range(
-                    0, len(linear) - byte if len(linear) - byte < 8 else 8
-                ):
-                    n ^= (linear[byte + bit] == "@") << bit
-                new_glyph.int8arr.append(n)
+
+            if not duplicate:
+                # Convert graphical representation to byte array
+                new_glyph.height = len(new_glyph.graphical)
+                new_glyph.width = len(new_glyph.graphical[0])
+                # Trim end
+                linear = "".join(new_glyph.graphical).rstrip(".")
+                # Find start position
+                for bit in range(0, len(linear)):
+                    if linear[bit] == "@":
+                        new_glyph.startx = bit % new_glyph.width
+                        new_glyph.starty = bit // new_glyph.width
+                        break
+                # Trim start
+                linear = linear.lstrip(".")
+                for byte in range(0, len(linear), 8):
+                    n = 0
+                    for bit in range(
+                        0, len(linear) - byte if len(linear) - byte < 8 else 8
+                    ):
+                        n ^= (linear[byte + bit] == "@") << bit
+                    new_glyph.int8arr.append(n)
+
             self.glyphs[new_glyph.byte] = new_glyph
 
     def compile_header(self):  # returns static data length
@@ -125,6 +138,7 @@ const uint8_t FONT_{NAME}[] = {{
     {START}, {END}, {HEIGHT}, {DEFAULT},
 """
         data_template = """    /* {BYTE} {NAME}
+     * Duplicate of = {DUPE_BYTE} (0 if not a duplicate)
      * Width = {WIDTH}
      * Pixel start X = {STARTX}
      * Pixel start Y = {STARTY}
@@ -148,34 +162,50 @@ const uint8_t FONT_{NAME}[] = {{
                 glyph = self.glyphs[byte]
             else:
                 glyph = Glyph()
+            data = [
+                glyph.duplicate if glyph.duplicate != -1 else 0,
+            ]
+            if glyph.duplicate == -1:
+                data += [glyph.width, glyph.startx, glyph.starty, len(glyph.int8arr), *glyph.int8arr]
             formatted_data = (
                 pprint.pformat(
-                    [
-                        glyph.width,
-                        glyph.startx,
-                        glyph.starty,
-                        len(glyph.int8arr),
-                        *glyph.int8arr,
-                    ],
+                    data,
                     indent=4,
                     width=80,
                     compact=True,
                 )[1:-1]
                 + ","
             )
-            formatted_data_blocks.append(
-                data_template.format(
-                    BYTE=str(byte),
-                    NAME=str(glyph.name),
-                    WIDTH=str(glyph.width),
-                    STARTX=str(glyph.startx),
-                    STARTY=str(glyph.starty),
-                    DATA_LENGTH=str(len(glyph.int8arr)),
-                    GRAPHICAL="\n     * ".join(glyph.graphical),
-                    DATA=formatted_data,
+            if glyph.duplicate == -1:
+                formatted_data_blocks.append(
+                    data_template.format(
+                        DUPE_BYTE=glyph.duplicate if glyph.duplicate != -1 else 0,
+                        BYTE=byte,
+                        NAME=glyph.name,
+                        WIDTH=glyph.width,
+                        STARTX=glyph.startx,
+                        STARTY=glyph.starty,
+                        DATA_LENGTH=len(glyph.int8arr),
+                        GRAPHICAL="\n     * ".join(glyph.graphical),
+                        DATA=formatted_data,
+                    )
                 )
-            )
-            data_size += 4 + len(glyph.int8arr)
+                data_size += 5 + len(glyph.int8arr)
+            else:
+                formatted_data_blocks.append(
+                    data_template.format(
+                        DUPE_BYTE=glyph.duplicate if glyph.duplicate != -1 else 0,
+                        BYTE=byte,
+                        NAME=glyph.name,
+                        WIDTH="None",
+                        STARTX="None",
+                        STARTY="None",
+                        DATA_LENGTH="None",
+                        GRAPHICAL="\n     * ".join(glyph.graphical),
+                        DATA=formatted_data,
+                    )
+                )
+                data_size += 1
         self.header_text = self.header_text.format(
             NAME=self.font_name.upper(),
             DATA="\n".join(formatted_data_blocks),
