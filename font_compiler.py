@@ -33,6 +33,10 @@ FONTS = {
     "Helv14": "windows/windows-3.0/helv-b/Helv_14.yaff",
     "Helv18": "windows/windows-3.0/helv-b/Helv_18.yaff",
     "Helv24": "windows/windows-3.0/helv-b/Helv_24.yaff",
+    # Courier 10, 12, 15
+    "Courier10": "windows/windows-3.1/courier-e/Courier_10.yaff",
+    "Courier12": "windows/windows-3.1/courier-e/Courier_12.yaff",
+    "Courier15": "windows/windows-3.1/courier-e/Courier_15.yaff",
 }
 
 
