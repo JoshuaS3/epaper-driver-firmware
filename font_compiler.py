@@ -1,5 +1,21 @@
 #!/usr/bin/env python3
 
+# File:
+#   esp32-heltec-epd/font_compiler.py
+# Description:
+#   Parses bitfonts from https://github.com/robhagemans/hoard-of-bitfonts and
+#   formats them as C source files, usable by this component's draw functions
+#   to render on Heltec ePaper display
+#
+# "esp32-heltec-epd" Copyright (c) 2023 Joshua Stockin
+# <josh@joshstock.in> [https://joshstock.in] [https://github.com/JoshuaS3]
+#
+# This software is licensed and distributed under the terms of the MIT License.
+# See the MIT License in the LICENSE file of this project's root folder.
+#
+# This comment block and its contents, including this disclaimer, MUST be
+# preserved in all copies or distributions of this software's source.
+
 import os
 import urllib.request
 from dataclasses import dataclass, field
