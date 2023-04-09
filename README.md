@@ -18,13 +18,13 @@ folder:
 
 Utilities, written in Python:
 
-- [font_compiler.py](font_compiler.py): serializes bitfont data
-- Backlog: color palette and bytecode generator utility
-- Backlog: image processing utilities, for converting image files to
+- [x] [font_compiler.py](font_compiler.py): serializes bitfont data
+- [ ] color palette and bytecode generator utility
+- [ ] canvas preview (export canvas data from C++ program, render in
+  native window)
+- [ ] image processing utilities, for converting image files to
   library-friendly bitmap data (direct DROM support, like with fonts, plus
   SPIFFS support?)
-- Backlog: canvas preview (export canvas data from C++ program, render in
-  native window)
 
 Some design notes:
 
@@ -35,25 +35,11 @@ Some design notes:
 - There should be very little variation between EPD board APIs. Every board
   should at the very least have functions for an initialization sequence, a
   full refresh, and a partial refresh.
-- Files in `fonts/`, `hw/`, and `inst/` should be header files. Even though
-  ESP-IDF automatically discards unused symbols, other MCU toolchains might
-  not.
 - `hw/` and `inst/` should contain one file each for MCU/EPD types. For
   example, `hw/esp32idf.h` and `inst/heltec290bw.h`.
-- Header files should use preprocessor directives to distinguish initialization
-  and declaration. Sources should be initialized only once in one source file.
-- Backlog: To save space, maybe wrap functions and other symbols in
-  preprocessor directives? e.g. `#ifdef INIT_SYMBOL` or `#ifdef USE_SYMBOL`
-- Backlog: Everything right now is written in C for purpose of compatibility.
-  C++ wrappers should be offered for convenience.
-- Backlog: Bytecode instructions and color palettes (BW, BWY, BWRY, etc.) per
-  board should be generated from a common dictionary (preferably from Python,
-  as the image processing utility will be).
-
-To also add to the project repository:
-
-- Image processing utilities (Python3?) for converting image files to
-  library-friendly bitmap data
+- All files except for API declarations are source files. It's the
+  responsibility of the toolchain or programmer to set compiler settings to
+  optimize away unused symbols. (ESP-IDF does this automatically.)
 
 ## TODO
 - [x] Font parsing, header file creation
