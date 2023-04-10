@@ -25,56 +25,32 @@ typedef struct epd_canvas {
     uint16_t width;
     uint16_t height;
     uint8_t pixel_depth; // number of bits per pixel
-
-    // square canvas region, data structure useful for fragmented data transfer over SPI
-    uint8_t region_size;
-    uint8_t x_regions;
-    uint8_t y_regions;
-    uint8_t **buffer;
+    uint8_t *buffer;
 } epd_canvas;
 
 // initialize canvas
-epd_canvas *epd_canvas_create( uint32_t width, uint32_t height, uint8_t pixel_depth, uint8_t region_size ) {
+epd_canvas *epd_canvas_create( uint32_t width, uint32_t height, uint8_t pixel_depth ) {
     epd_canvas *canvas = malloc( sizeof( epd_canvas ) );
 
     canvas->width = width;
     canvas->height = height;
     canvas->pixel_depth = pixel_depth;
-    canvas->region_size = region_size;
 
-    // initiate memory for canvas regions
-    canvas->x_regions = ( width + region_size - 1 ) / region_size; // +region_size-1 to round up int division
-    canvas->y_regions = ( height + region_size - 1 ) / region_size;
-    canvas->buffer = ( uint8_t** ) malloc( sizeof( uint8_t* ) * x_regions * y_regions );
-    for ( uint8_t region_x = 0; x < canvas->x_regions; x++ ) {
-        for ( uint8_t region_y = 0; y < canvas->y_regions; y++ ) {
-            uint16_t region_num = region_x * canvas->x_regions + region_y;
+    // initiate memory for canvas
+    uint32_t memsize = (width * height * pixel_depth + 7) / 8; // +7 to round down int division
+    canvas->buffer = ( uint8_t* ) malloc( memsize );
 
-            // region dimensions
-            uint8_t region_width = region_size;
-            uint8_t region_height = region_size;
-            if ( region_x == canvas->x_regions - 1 ) region_width = width % region_size; // edge of canvas
-            if ( region_y == canvas->y_regions - 1 ) region_height = height % region_size;
-
-            // region data size
-            uint32_t bit_count = pixel_depth * region_width * region_height;
-            uint32_t byte_count = ( bit_count + 7 ) / 8; // +7 to round up int division
-
-            // allocate region
-
-            // design note: why not separate the channels, e.g. have
-            // n=pixel_depth channels/buffers for color operations? while this
-            // would be very easy to do, and would make the pixel set/get
-            // operations much easier, it would only really be viable for
-            // pixel_depth < 3. new ePaper displays have increasingly high
-            // color resolution and would require greater pixel depths. in
-            // theory, packing data like this reduces RAM read/write
-            // operations, speeding up the module. TODO however is a "batch get
-            // channel" function, which returns a region's pixel data in the
-            // Nth channel.
-            canvas->buffer[ region_num ] = ( uint8_t* ) calloc( byte_count );
-        }
-    }
+    // design note: why not separate the channels, e.g. have n=pixel_depth
+    // channels/buffers for color operations? while this would be very easy to
+    // do, and would make the pixel set/get operations much easier, it would
+    // only really be viable for pixel_depth < 3. new ePaper displays have
+    // increasingly high color resolution and would require greater pixel bit
+    // depths. for example, it makes more sense to use 2 bits per pixel for
+    // displays that can do black, white, and red and/or yellow color instead
+    // of 3-4 bits. also, in theory, packing data like this reduces RAM
+    // read/write operations, speeding up the module. TODO however is a "batch
+    // get channel" function, which returns a region's pixel data in the Nth
+    // channel.
 
     return canvas;
 }
@@ -84,27 +60,18 @@ void epd_canvas_pixel_set( epd_canvas *canvas, uint32_t pixel_x, uint32_t pixel_
     if ( pixel_x >= canvas->width ) return;
     if ( pixel_y >= canvas->height ) return;
 
-    // which region?
-    uint8_t region_x = pixel_x / canvas->region_size; // truncated int division
-    uint8_t region_y = pixel_y / canvas->region_size;
-    uint8_t region_num = region_x * canvas->x_regions + region_y;
-    uint8_t *region = canvas->buffer[ region_num ];
-
-    // where is pixel within region?
-    uint32_t region_pixel_x = pixel_x - ( region_x * canvas->region_size );
-    uint32_t region_pixel_y = pixel_y - ( region_y * canvas->region_size );
-
-    // where in region buffer is this pixel?
-    uint32_t region_pixel_start_bit = ( ( region_pixel_x * canvas->region_size ) + region_pixel_y ) * canvas->pixel_depth;
+    // where in buffer is the pixel?
+    uint32_t buffer_pixel_start_bit = (pixel_x + canvas->width*pixel_y) * canvas->pixel_depth;
 
     // <overwrite bits>
-    uint32_t current_byte = region_pixel_start_bit / 8; // byte in region
-    uint32_t current_bit = region_pixel_start_bit % 8;  // bit in byte
+    uint32_t current_byte = buffer_pixel_start_bit / 8; // byte in region
+    uint32_t current_bit = buffer_pixel_start_bit % 8;  // bit in byte
+    uint8_t *buffer = canvas->buffer;
     if ( canvas->pixel_depth == 1 ) {
         // single bit operation, easy
         uint8_t buffer_mask = 1 << current_bit;
-        region[ current_byte ] ^= region[ current_byte ] & buffer_mask; // erase original bit
-        reigon[ current_byte ] |= (value << current_bit); // replace with new
+        buffer[ current_byte ] ^= buffer[ current_byte ] & buffer_mask; // erase original bit
+        buffer[ current_byte ] |= (value << current_bit); // replace with new
     } else {
         // we have to do this weird bit wrangling because the pixel data
         // usually won't start exactly at the beginning of the byte, and may be
@@ -123,13 +90,13 @@ void epd_canvas_pixel_set( epd_canvas *canvas, uint32_t pixel_x, uint32_t pixel_
             uint8_t buffer_mask = (uint8_t)(((1 << (canvas->pixel_depth - relative_bit)) - 1) << current_bit);
 
             // delete original buffer data in slot
-            region[ current_byte ] ^= region[ current_byte ] & buffer_mask;
+            buffer[ current_byte ] ^= buffer[ current_byte ] & buffer_mask;
 
             // fetch and position new data from inputted value
             uint8_t new_data = (uint8_t)((( value >> relative_bit ) & ((1 << (canvas->pixel_depth - relative_bit)) - 1)) << current_bit);
 
             // write to data slot in buffer
-            region[ current_byte ] |= new_data;
+            buffer[ current_byte ] |= new_data;
 
             // step forward:
             // future iterations will always be at the beginning of a new byte
@@ -156,25 +123,16 @@ uint32_t epd_canvas_pixel_get( epd_canvas *canvas, uint32_t pixel_x, uint32_t pi
     if ( pixel_x >= canvas->width ) return;
     if ( pixel_y >= canvas->height ) return;
 
-    // which region?
-    uint8_t region_x = pixel_x / canvas->region_size; // truncated int division
-    uint8_t region_y = pixel_y / canvas->region_size;
-    uint8_t region_num = region_x * canvas->x_regions + region_y;
-    uint8_t *region = canvas->buffer[ region_num ];
+    // where in buffer is the pixel?
+    uint32_t buffer_pixel_start_bit = (pixel_x + canvas->width*pixel_y) * canvas->pixel_depth;
 
-    // where is pixel within region?
-    uint32_t region_pixel_x = pixel_x - ( region_x * canvas->region_size );
-    uint32_t region_pixel_y = pixel_y - ( region_y * canvas->region_size );
-
-    // where in region buffer is this pixel?
-    uint32_t region_pixel_start_bit = ( ( region_pixel_x * canvas->region_size ) + region_pixel_y ) * canvas->pixel_depth;
-
+    // fetch pixel data
     uint32_t current_byte = region_pixel_start_bit / 8; // byte in region
     uint32_t current_bit = region_pixel_start_bit % 8;  // bit in byte
+    uint8_t *buffer = canvas->buffer;
     uint32_t accumulator = 0;
-
     if ( canvas->pixel_depth == 1 ) {
-        accumulator = (region[ current_byte ] >> current_bit) & 1;
+        accumulator = (buffer[ current_byte ] >> current_bit) & 1;
     } else {
         // same logic as pixel set function
         uint8_t relative_bit = 0;
@@ -183,7 +141,7 @@ uint32_t epd_canvas_pixel_get( epd_canvas *canvas, uint32_t pixel_x, uint32_t pi
             uint8_t buffer_mask = (uint8_t)(((1 << (canvas->pixel_depth - relative_bit)) - 1) << current_bit);
 
             // fetch data and accumulate
-            accumulator = (accumulator << (canvas->pixel_depth - relative_bit)) | (( region[ current_byte ] & buffer_mask ) >> current_bit);
+            accumulator = (accumulator << (canvas->pixel_depth - relative_bit)) | (( buffer[ current_byte ] & buffer_mask ) >> current_bit);
 
             // iterate
             relative_bit += ( 8 - current_bit );
