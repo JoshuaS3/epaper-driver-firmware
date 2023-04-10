@@ -17,16 +17,10 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include "../heltec_epd.h"
 
 // TODO: test this module
 
-// structure containing canvas metadata, screen buffer data
-typedef struct epd_canvas {
-    uint16_t width;
-    uint16_t height;
-    uint8_t pixel_depth; // number of bits per pixel
-    uint8_t *buffer;
-} epd_canvas;
 
 // initialize canvas
 epd_canvas *epd_canvas_create( uint32_t width, uint32_t height, uint8_t pixel_depth ) {
@@ -71,7 +65,7 @@ void epd_canvas_pixel_set( epd_canvas *canvas, uint32_t pixel_x, uint32_t pixel_
         // single bit operation, easy
         uint8_t buffer_mask = 1 << current_bit;
         buffer[ current_byte ] ^= buffer[ current_byte ] & buffer_mask; // erase original bit
-        buffer[ current_byte ] |= (value << current_bit); // replace with new
+        buffer[ current_byte ] |= ((value & 1) << current_bit); // replace with new
     } else {
         // we have to do this weird bit wrangling because the pixel data
         // usually won't start exactly at the beginning of the byte, and may be
@@ -120,15 +114,15 @@ void epd_canvas_pixel_set( epd_canvas *canvas, uint32_t pixel_x, uint32_t pixel_
 
 // fetch pixel value at given physical location
 uint32_t epd_canvas_pixel_get( epd_canvas *canvas, uint32_t pixel_x, uint32_t pixel_y ) {
-    if ( pixel_x >= canvas->width ) return;
-    if ( pixel_y >= canvas->height ) return;
+    if ( pixel_x >= canvas->width ) return 0;
+    if ( pixel_y >= canvas->height ) return 0;
 
     // where in buffer is the pixel?
     uint32_t buffer_pixel_start_bit = (pixel_x + canvas->width*pixel_y) * canvas->pixel_depth;
 
     // fetch pixel data
-    uint32_t current_byte = region_pixel_start_bit / 8; // byte in region
-    uint32_t current_bit = region_pixel_start_bit % 8;  // bit in byte
+    uint32_t current_byte = buffer_pixel_start_bit / 8; // byte in region
+    uint32_t current_bit = buffer_pixel_start_bit % 8;  // bit in byte
     uint8_t *buffer = canvas->buffer;
     uint32_t accumulator = 0;
     if ( canvas->pixel_depth == 1 ) {
