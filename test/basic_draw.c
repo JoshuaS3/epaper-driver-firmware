@@ -15,7 +15,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../heltec_epd.h"
+#include "heltec_epd.h"
 
 #define CANVAS_WIDTH 296
 #define CANVAS_HEIGHT 128
@@ -88,20 +88,14 @@ void print( epd_canvas *canvas, int x, int y, const char *string, const uint8_t 
 
 int main( void ) {
     epd_canvas *canvas = epd_canvas_create( CANVAS_WIDTH, CANVAS_HEIGHT, BIT_DEPTH );
-    for ( int x = 0; x < CANVAS_WIDTH; x++ ) {
-        epd_canvas_pixel_set( canvas, x, x % CANVAS_HEIGHT, x );
-        epd_canvas_pixel_set( canvas, x, CANVAS_HEIGHT - (x % CANVAS_HEIGHT), x );
-    }
-    /*print( canvas, 5, 0, "Hello, World!", FONT_SERIF24 );
+
+    print( canvas, 5, 0, "Hello, World!", FONT_SERIF24 );
     print( canvas, 5, 28, "Hello, World!", FONT_SERIF18 );
     print( canvas, 5, 28+22, "Hello, World!", FONT_SERIF14 );
     print( canvas, 5, 28+22+18, "Hello, World!", FONT_SERIF12 );
     print( canvas, 5, 28+22+18+16, "Hello, World!", FONT_SERIF10 );
     print( canvas, 5, 28+22+18+16+14, "Hello, World!", FONT_SERIF8 );
-    */
-    print( canvas, 5, 0, "Hello, World!", FONT_COURIER10 );
-    print( canvas, 5, 14, "Hello, World!", FONT_COURIER12 );
-    print( canvas, 5, 14 + 19 , "Hello, World!", FONT_COURIER15 );
+
     int bufsize = ( CANVAS_WIDTH * CANVAS_HEIGHT * BIT_DEPTH + 7 ) / 8;
     for ( int b = 0; b < bufsize; b++ ) {
         putchar(canvas->buffer[ b ]);

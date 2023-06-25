@@ -17,12 +17,13 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include "../heltec_epd.h"
+#include "heltec_epd.h"
 
 // TODO: test this module
 
 
 // initialize canvas
+// should the canvas memory be static?
 epd_canvas *epd_canvas_create( uint32_t width, uint32_t height, uint8_t pixel_depth ) {
     epd_canvas *canvas = malloc( sizeof( epd_canvas ) );
 
@@ -31,7 +32,7 @@ epd_canvas *epd_canvas_create( uint32_t width, uint32_t height, uint8_t pixel_de
     canvas->pixel_depth = pixel_depth;
 
     // initiate memory for canvas
-    uint32_t memsize = (width * height * pixel_depth + 7) / 8; // +7 to round down int division
+    uint32_t memsize = (width * height * pixel_depth + 7) / 8; // +7 to round up int division
     canvas->buffer = ( uint8_t* ) malloc( memsize );
 
     // design note: why not separate the channels, e.g. have n=pixel_depth

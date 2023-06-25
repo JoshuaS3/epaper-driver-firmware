@@ -23,7 +23,7 @@ import pprint
 
 
 CURRENT_DIR = os.path.realpath(os.path.dirname(__file__))
-FONTS_DIR = os.path.join(CURRENT_DIR, "fonts")
+FONTS_DIR = os.path.join(CURRENT_DIR, "..", "src", "fonts")
 ROOT_FONT_URI = (
     "https://raw.githubusercontent.com/robhagemans/hoard-of-bitfonts/master/"
 )
@@ -67,6 +67,7 @@ class Glyph:
     duplicate: int = -1
     graphical: list[str] = field(default_factory=list)
     int8arr: list[int] = field(default_factory=list)
+
     def __eq__(self, obj):
         return self.graphical == obj.graphical
 
@@ -189,7 +190,9 @@ const uint8_t FONT_{NAME}[] = {{
             )
         )
         data_size = 4
-        for byte in range(min(self.glyphs.keys()), min(255, max(self.glyphs.keys())) + 1):
+        for byte in range(
+            min(self.glyphs.keys()), min(255, max(self.glyphs.keys())) + 1
+        ):
             glyph = None
             if byte in self.glyphs.keys():
                 glyph = self.glyphs[byte]
@@ -199,7 +202,13 @@ const uint8_t FONT_{NAME}[] = {{
                 glyph.duplicate if glyph.duplicate != -1 else 0,
             ]
             if glyph.duplicate == -1:
-                data += [glyph.width, glyph.startx, glyph.starty, len(glyph.int8arr), *glyph.int8arr]
+                data += [
+                    glyph.width,
+                    glyph.startx,
+                    glyph.starty,
+                    len(glyph.int8arr),
+                    *glyph.int8arr,
+                ]
             formatted_data = (
                 pprint.pformat(
                     data,

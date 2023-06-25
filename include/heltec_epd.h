@@ -1,8 +1,8 @@
 /* File:
- *   esp32-heltec-epd/heltec_epd.h
+ *   epd.h
  * Description:
- *   Header with public functions from esp32-heltec-epd, ESP32 component for
- *   driving Heltec ePaper displays.
+ *   Header with public functions from embedded-epaper, a library for driving
+ *   ePaper displays from embedded microcontrollers.
  *
  * "esp32-heltec-epd" Copyright (c) 2023 Joshua Stockin
  * <josh@joshstock.in> [https://joshstock.in] [https://github.com/JoshuaS3]
