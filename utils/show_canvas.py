@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 # File:
-#   esp32-heltec-epd/show_canvas.py
+#   utils/show_canvas.py
 # Description:
 #   Uses matplotlib to produce a preview canvas with data piped from a C/C++
 #   program.
 #
-# "esp32-heltec-epd" Copyright (c) 2023 Joshua Stockin
+# "epaper-driver-firmware" Copyright (c) 2023 Joshua Stockin
 # <josh@joshstock.in> [https://joshstock.in] [https://github.com/JoshuaS3]
 #
 # This software is licensed and distributed under the terms of the MIT License.

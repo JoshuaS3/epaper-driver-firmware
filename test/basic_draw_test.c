@@ -1,9 +1,9 @@
 /* File:
- *   esp32-heltec-epd/test/basic_draw.c
+ *   test/basic_draw_test.c
  * Description:
  *   Very basic test on canvas structure using direct pixel setting operations.
  *
- * "esp32-heltec-epd" Copyright (c) 2023 Joshua Stockin
+ * "epaper-driver-firmware" Copyright (c) 2023 Joshua Stockin
  * <josh@joshstock.in> [https://joshstock.in] [https://github.com/JoshuaS3]
  *
  * This software is licensed and distributed under the terms of the MIT License.
@@ -15,7 +15,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "heltec_epd.h"
+#include "epd.h"
 
 #define CANVAS_WIDTH 296
 #define CANVAS_HEIGHT 128

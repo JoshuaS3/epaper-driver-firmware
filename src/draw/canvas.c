@@ -1,10 +1,10 @@
 /* File:
- *   esp32-heltec-epd/draw/canvas.c
+ *   draw/canvas.c
  * Description:
  *   Bit packing data structures for pixel operations on canvas of variable
  *   width X and height Y with variable "depth" pixels (bit count).
  *
- * "esp32-heltec-epd" Copyright (c) 2023 Joshua Stockin
+ * "epaper-driver-firmware" Copyright (c) 2023 Joshua Stockin
  * <josh@joshstock.in> [https://joshstock.in] [https://github.com/JoshuaS3]
  *
  * This software is licensed and distributed under the terms of the MIT License.
@@ -17,7 +17,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include "heltec_epd.h"
+#include "epd.h"
 
 // TODO: test this module
 

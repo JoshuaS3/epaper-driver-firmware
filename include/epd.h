@@ -1,10 +1,10 @@
 /* File:
  *   epd.h
  * Description:
- *   Header with public functions from embedded-epaper, a library for driving
- *   ePaper displays from embedded microcontrollers.
+ *   Header with public functions from epaper-driver-firmware, a library for
+ *   driving ePaper displays from embedded microcontrollers.
  *
- * "esp32-heltec-epd" Copyright (c) 2023 Joshua Stockin
+ * "epaper-driver-firmware" Copyright (c) 2023 Joshua Stockin
  * <josh@joshstock.in> [https://joshstock.in] [https://github.com/JoshuaS3]
  *
  * This software is licensed and distributed under the terms of the MIT License.
@@ -14,9 +14,8 @@
  * preserved in all copies or distributions of this software's source.
  */
 
-#pragma once
-#ifndef INCLUDE__ESP32_HELTEC_EPD_H
-#define INCLUDE__ESP32_HELTEC_EPD_H
+#ifndef EMBEDDED_EPAPER_DRIVER_H_
+#define EMBEDDED_EPAPER_DRIVER_H_
 
 #include <stdint.h>
 

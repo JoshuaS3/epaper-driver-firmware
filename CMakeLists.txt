@@ -29,6 +29,6 @@ set(SOURCES
     src/fonts/Serif18.c
     src/fonts/Serif24.c)
 
-add_executable(basic_draw
+add_executable(basic_draw_test
                 ${SOURCES}
-                test/basic_draw.c)
+                test/basic_draw_test.c)
