@@ -58,10 +58,10 @@ Some design notes:
 - [ ] Image processing utilities (image files to bitmaps)
 - [ ] Basic draw functions (use option structs?)
   - [ ] Line
-    - [ ] Horizontal fast (x,y) origin to (dx,dy=0)
-    - [ ] Vertical fast (x,y) origin to (dx=0,dy)
-    - [ ] (x1,y1) to (x2,y2)
-    - [ ] (x,y) origin to (dx,dy)
+    - [x] Horizontal fast (x,y) origin to (dx,dy=0)
+    - [x] Vertical fast (x,y) origin to (dx=0,dy)
+    - [x] (x1,y1) to (x2,y2)
+    - [x] (x,y) origin to (dx,dy)
     - [ ] (x,y) origin to (r,θ)
   - [ ] Area fill
   - [ ] Clear screen
@@ -70,7 +70,7 @@ Some design notes:
   - [ ] Roundrect
   - [ ] Triangle
   - [ ] Text
-  - [ ] Circle
+  - [x] Circle
   - [ ] Ellipse
   - [ ] Arc
   - [ ] Image

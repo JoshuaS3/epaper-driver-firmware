@@ -24,12 +24,41 @@ typedef struct epd_canvas {
     uint16_t width;
     uint16_t height;
     uint8_t pixel_depth; // number of bits per pixel
-    uint8_t *buffer;
+    uint8_t **buffer;
 } epd_canvas;
 
-epd_canvas *epd_canvas_create( uint32_t width, uint32_t height, uint8_t pixel_depth );
-void epd_canvas_pixel_set( epd_canvas *canvas, uint32_t pixel_x, uint32_t pixel_y, uint32_t value );
-uint32_t epd_canvas_pixel_get( epd_canvas *canvas, uint32_t pixel_x, uint32_t pixel_y );
+epd_canvas *epd_canvas_create(uint16_t width, uint16_t height, uint8_t pixel_depth);
+void epd_canvas_free(epd_canvas *canvas);
+void epd_canvas_pixel_set(epd_canvas *canvas, uint16_t pixel_x, uint16_t pixel_y, uint8_t value);
+uint8_t epd_canvas_pixel_get(epd_canvas *canvas, uint16_t pixel_x, uint16_t pixel_y);
 
+// line drawing
+void epd_draw_line(epd_canvas *canvas, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t color);
+void epd_draw_line_delta(epd_canvas *canvas, uint16_t x0, uint16_t y0, int16_t dx, int16_t dy, uint8_t color);
+void epd_draw_fast_line_horizontal(epd_canvas *canvas, uint16_t x0, uint16_t y0, int16_t dx, uint8_t color);
+
+// ellipse drawing
+void epd_draw_circle(epd_canvas *canvas, uint16_t x0, uint16_t y0, uint16_t radius, uint8_t color);
+
+// font rendering
+extern const uint8_t FONT_SANSSERIF24[];
+extern const uint8_t FONT_SANSSERIF18[];
+extern const uint8_t FONT_SANSSERIF14[];
+extern const uint8_t FONT_SANSSERIF12[];
+extern const uint8_t FONT_SANSSERIF10[];
+extern const uint8_t FONT_SANSSERIF8[];
+
+extern const uint8_t FONT_SERIF24[];
+extern const uint8_t FONT_SERIF18[];
+extern const uint8_t FONT_SERIF14[];
+extern const uint8_t FONT_SERIF12[];
+extern const uint8_t FONT_SERIF10[];
+extern const uint8_t FONT_SERIF8[];
+
+extern const uint8_t FONT_COURIER10[];
+extern const uint8_t FONT_COURIER12[];
+extern const uint8_t FONT_COURIER15[];
+
+void epd_text_prints(epd_canvas *canvas, int x, int y, const char *string, const uint8_t FONT[], uint8_t color);
 
 #endif

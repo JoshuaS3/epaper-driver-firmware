@@ -50,27 +50,22 @@ def read() -> bytearray:
     return sys.stdin.buffer.read()
 
 
-def bits(buf: bytearray):
-    x = []
-    for b in buf:
-        for i in range(8):
-            x.append((b >> i) & 1)
-    return x
-
-
 def colorize(value):
     match value:
         case 0:
             return (255, 255, 255)
         case 1:
             return (0, 0, 0)
+        case 2:
+            return (200, 30, 30)
+        case 3:
+            return (200, 200, 30)
         case _:
             return (255, 255, 255)
 
 
-def format(buf: bytearray, canvas_size: size_t, pixel_depth: int) -> canvas_t:
+def format(bitarr: bytearray, canvas_size: size_t, pixel_depth: int) -> canvas_t:
     canvas = Canvas(canvas_size, pixel_depth)
-    bitarr = bits(buf)
     for i, v in enumerate(bitarr):
         x = i % canvas_size[0]
         y = i // canvas_size[0]

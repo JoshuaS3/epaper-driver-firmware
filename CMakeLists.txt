@@ -3,10 +3,15 @@
 cmake_minimum_required(VERSION 3.22)
 project(ePaperDisplayTest)
 
-include_directories(include)
+set(CMAKE_C_FLAGS "-Os")
+
+include_directories(include test)
 
 set(SOURCES
     src/draw/canvas.c
+    src/draw/line.c
+    src/draw/ellipses.c
+    src/draw/text.c
     src/fonts/Courier10.c
     src/fonts/Courier12.c
     src/fonts/Courier15.c
