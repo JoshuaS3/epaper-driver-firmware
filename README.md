@@ -63,15 +63,14 @@ Some design notes:
     - [x] (x1,y1) to (x2,y2)
     - [x] (x,y) origin to (dx,dy)
     - [ ] (x,y) origin to (r,θ)
-  - [ ] Area fill
+  - [x] Area fill
   - [ ] Clear screen
   - [ ] Clear region
-  - [ ] Rectangle
+  - [x] Rectangle
   - [ ] Roundrect
-  - [ ] Triangle
-  - [ ] Text
+  - [x] Text
   - [x] Circle
-  - [ ] Ellipse
+  - [x] Ellipse
   - [ ] Arc
   - [ ] Image
 - [ ] Heltec 2.90" black/white display instruction set `src/epd/heltec_290_bw.h`

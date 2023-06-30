@@ -1,8 +1,8 @@
 /* File:
  *   draw/canvas.c
  * Description:
- *   Bit packing data structures for pixel operations on canvas of variable
- *   width X and height Y with variable "depth" pixels (bit count).
+ *   Data structures for pixel operations on canvas of variable width X and
+ *   height Y with variable "depth" pixels (bit/channel count per pixel).
  *
  * "epaper-driver-firmware" Copyright (c) 2023 Joshua Stockin
  * <josh@joshstock.in> [https://joshstock.in] [https://github.com/JoshuaS3]
@@ -18,8 +18,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "epd.h"
-
-// todo js test this module
 
 // initialize canvas
 epd_canvas *epd_canvas_create(uint16_t width, uint16_t height, uint8_t pixel_depth) {
@@ -79,4 +77,16 @@ uint8_t epd_canvas_pixel_get(epd_canvas *canvas, uint16_t pixel_x, uint16_t pixe
     }
 
     return accumulator;
+}
+
+void epd_canvas_pixel_clear(epd_canvas *canvas, uint16_t pixel_x, uint16_t pixel_y) {
+    epd_canvas_pixel_set(canvas, pixel_x, pixel_y, 0);
+}
+
+void epd_canvas_channel_clear(epd_canvas *canvas, uint8_t channel) {
+    if (channel >= canvas->pixel_depth) { return; }
+    uint32_t channel_size_bytes = (canvas->width * canvas->height + 7U) >> 3U; // +7 to round up int division
+    for (uint32_t byte = 0; byte < channel_size_bytes; byte++) {
+        canvas->buffer[channel][byte] = 0;
+    }
 }

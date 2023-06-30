@@ -9,8 +9,9 @@ include_directories(include test)
 
 set(SOURCES
     src/draw/canvas.c
-    src/draw/line.c
     src/draw/ellipses.c
+    src/draw/line.c
+    src/draw/rect.c
     src/draw/text.c
     src/fonts/Courier10.c
     src/fonts/Courier12.c

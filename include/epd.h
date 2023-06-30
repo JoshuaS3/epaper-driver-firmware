@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 
+/* canvas.c */
 // structure containing canvas metadata, screen buffer data
 typedef struct epd_canvas {
     uint16_t width;
@@ -31,16 +32,29 @@ epd_canvas *epd_canvas_create(uint16_t width, uint16_t height, uint8_t pixel_dep
 void epd_canvas_free(epd_canvas *canvas);
 void epd_canvas_pixel_set(epd_canvas *canvas, uint16_t pixel_x, uint16_t pixel_y, uint8_t value);
 uint8_t epd_canvas_pixel_get(epd_canvas *canvas, uint16_t pixel_x, uint16_t pixel_y);
+void epd_canvas_pixel_clear(epd_canvas *canvas, uint16_t pixel_x, uint16_t pixel_y);
+void epd_canvas_channel_clear(epd_canvas *canvas, uint8_t channel);
+/* canvas.c */
 
-// line drawing
+/* line.c */
 void epd_draw_line(epd_canvas *canvas, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t color);
 void epd_draw_line_delta(epd_canvas *canvas, uint16_t x0, uint16_t y0, int16_t dx, int16_t dy, uint8_t color);
 void epd_draw_fast_line_horizontal(epd_canvas *canvas, uint16_t x0, uint16_t y0, int16_t dx, uint8_t color);
+void epd_draw_fast_line_vertical(epd_canvas *canvas, uint16_t x0, uint16_t y0, int16_t dy, uint8_t color);
+/* line.c */
 
-// ellipse drawing
+/* rect.c */
+void epd_draw_rect(epd_canvas *canvas, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t color);
+void epd_draw_rect_fill(epd_canvas *canvas, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t color);
+
+/* ellipses.c */
 void epd_draw_circle(epd_canvas *canvas, uint16_t x0, uint16_t y0, uint16_t radius, uint8_t color);
+void epd_draw_circle_filled(epd_canvas *canvas, uint16_t x0, uint16_t y0, uint16_t radius, uint8_t color);
+void epd_draw_ellipse(epd_canvas *canvas, uint16_t x_center, uint16_t y_center, uint16_t x_radius, uint16_t y_radius, uint8_t color);
+void epd_draw_ellipse_filled(epd_canvas *canvas, uint16_t x_center, uint16_t y_center, uint16_t x_radius, uint16_t y_radius, uint8_t color);
+/* ellipses.c */
 
-// font rendering
+/* fonts/*.c */
 extern const uint8_t FONT_SANSSERIF24[];
 extern const uint8_t FONT_SANSSERIF18[];
 extern const uint8_t FONT_SANSSERIF14[];
@@ -58,7 +72,10 @@ extern const uint8_t FONT_SERIF8[];
 extern const uint8_t FONT_COURIER10[];
 extern const uint8_t FONT_COURIER12[];
 extern const uint8_t FONT_COURIER15[];
+/* fonts/*.c */
 
+/* text.c */
 void epd_text_prints(epd_canvas *canvas, int x, int y, const char *string, const uint8_t FONT[], uint8_t color);
+/* text.c */
 
 #endif
